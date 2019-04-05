@@ -1,26 +1,19 @@
-var minNumber = 0, maxNumber = 100;
+var generateRandomNumbers = function(min, max, total) {
+  var nums = [];
+  while (nums.length < total) {
+    var ran = Math.floor(Math.random() * max) + min;
+    if (nums.indexOf(ran) === -1) nums.push(ran);
+  }
+  return nums;
+};
 
-var nums = {};
-var count = 0;
-while (count < 5) {
-    var ran = Math.floor(Math.random() * maxNumber) + minNumber;
-    if (!nums["" + ran]) {
-        nums["" + ran] = ran;
-        count++;
-    }
-}
+var generateQuestions = function(min, max, total) {
+  var questions = {};
+  var nums = generateRandomNumbers(min, max, total);
+  for (const k of nums) {
+    questions[k + ""] = new NumbersLine("#test", 50, 50, 10, 50, min, max, k);
+  }
+  return questions;
+};
 
-var questions = {};
-for (var k in nums) {
-    questions[k] = new NumbersLine("#test", 50, 50, 10, 50, minNumber, maxNumber, nums[k]);
-}
-
-var checkResult = function (e, num) {
-    var target = e.target;
-    var input = target.previousElementSibling.value;
-
-    var q = questions[num + ""];
-    if (q) {
-        q.checkResult(input);
-    }
-}
+generateQuestions(0, 100, 5);
