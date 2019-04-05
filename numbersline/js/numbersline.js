@@ -58,9 +58,9 @@ class NumbersLine {
       randomNumber
     ];
 
-    (this._inputBoxWidth = 120),
-      (this._inputBoxHeight = 30),
-      (this._inputBoxTop = 80),
+    (this._inputBoxWidth = 150),
+      (this._inputBoxHeight = 50),
+      (this._inputBoxTop = 100),
       (this._inputBoxSize =
         (Math.max(Math.abs(minNumber), Math.abs(maxNumber)) + "").length + 1);
 
@@ -122,15 +122,11 @@ class NumbersLine {
     this._xAxis = axis;
   }
 
-  getInputHtml(value) {
+  getInputHtml() {
     return (
       '<div xmlns="http://www.w3.org/2000/svg" style="width: 100px;height: 100%;display:table;vertical-align:middle;line-height: 30px;position: relative;">' +
-      '<input style="font-size: 20px;box-shadow: inset 0 0 10px grey;width:60px;" maxlength="' +
-      this._inputBoxSize +
-      '" ' +
-      (value == undefined ? "" : "value=" + value) +
-      "></input>" +
-      '<button style="width:50px;height:28px;top: 0px;position: absolute;">CHECK</button>' +
+      '<input style="font-size: 20px;box-shadow: inset 0 0 10px grey;width:60px;"></input>' +
+      '<button style="top: 0px;position: absolute;">CHECK</button>' +
       "</div>"
     );
   }
@@ -146,7 +142,9 @@ class NumbersLine {
     };
   }
 
-  renderInputBox(input) {
+  renderInputBox(answer) {
+    this._html = this.getInputHtml(answer);
+
     this._questionMark = this._xAxis.selectAll("g").filter(function() {
       return (
         d3
@@ -167,11 +165,15 @@ class NumbersLine {
       .html(this._html);
 
     var that = this;
-    this._inputBox.select("input").on("keypress", function() {
-      if (d3.event && d3.event.code === "Enter") {
-        that.checkResult(d3.event.target.value);
-      }
-    });
+    this._inputBox
+      .select("input")
+      .on("keypress", function() {
+        if (d3.event && d3.event.code === "Enter") {
+          that.checkResult(d3.event.target.value);
+        }
+      })
+      .attr("maxlength", this._inputBoxSize)
+      .attr("value", answer);
 
     this._inputBox.select("button").on("click", function() {
       if (d3.event) {
@@ -211,7 +213,6 @@ class NumbersLine {
   }
 
   showTips(answer) {
-    this._html = this.getInputHtml(answer);
     this._tickValues = d3.range(
       this._minNumber,
       this._maxNumber,
@@ -235,27 +236,42 @@ class NumbersLine {
       .transition("fadeout")
       .attr("stroke-width", 1)
       .duration(400);
-    this.renderInputBox();
+    this.renderInputBox(answer);
   }
 
   checkResult(answer) {
     if (answer === "") return;
     const diff = Math.abs(answer - this._randomNumber);
+    let score = 10;
 
     if (diff <= 0.5) {
-      alert("perfect!");
       this.showTips(answer);
+      score = 10;
     } else if (diff <= 5) {
-      alert("awesome!");
       this.showTips(answer);
+      score = 9;
     } else if (diff <= 10) {
-      alert("good!");
       this.showTips(answer);
+      score = 8;
     } else if (diff <= 20) {
-      alert("fine!");
       this.showTips(answer);
+      score = 7;
     } else {
-      alert("Try again pls !");
+      score = 6;
     }
+    this.showScoreCard(score);
+  }
+
+  showScoreCard(score) {
+    const mid = (this._maxNumber - this._minNumber) / 2;
+    const w = 200,
+      h = 100;
+    const x =
+      this._randomNumber > mid
+        ? this._xScale(this._maxNumber - this._minNumber) / 4 - w / 2
+        : (this._xScale(this._maxNumber - this._minNumber) * 3) / 4 - w / 2;
+    const y = -100;
+    const vc = new ScoreCard(this._svg, x, y, w, h, score);
+    vc.show();
   }
 }

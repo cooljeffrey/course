@@ -4,6 +4,11 @@
     <title>Simple Math Course - Numbers Line</title>
     <meta charset="utf-8" />
     <base target="_blank" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css"
+    />
     <style type="text/css">
       .line {
         fill: none;
@@ -13,14 +18,32 @@
 
       #test {
         width: 900px;
-        height: 80px;
+        height: 100px;
       }
     </style>
     <script src="https://d3js.org/d3.v5.min.js"></script>
   </head>
 
   <body>
-    <div id="test"></div>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-12 center">
+          <div class="header" style="text-align: center;">
+            <h1>Numbers Line</h1>
+            <p>Try to guess the number on the scale line!</p>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+          <div id="test"></div>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
+    </div>
+
+    <script src="js/scorecard.js"></script>
     <script src="js/numbersline.js"></script>
     <script src="js/index.js"></script>
   </body>
