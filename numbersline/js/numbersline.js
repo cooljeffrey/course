@@ -58,7 +58,7 @@ class NumbersLine {
       randomNumber
     ];
 
-    (this._inputBoxWidth = 150),
+    (this._inputBoxWidth = 170),
       (this._inputBoxHeight = 50),
       (this._inputBoxTop = 100),
       (this._inputBoxSize =
@@ -124,9 +124,9 @@ class NumbersLine {
 
   getInputHtml() {
     return (
-      '<div xmlns="http://www.w3.org/2000/svg" style="width: 100px;height: 100%;display:table;vertical-align:middle;line-height: 30px;position: relative;">' +
+      '<div xmlns="http://www.w3.org/2000/svg" style="width: 100px;height: 100%;display:inline;vertical-align:middle;line-height: 30px;">' +
       '<input style="font-size: 20px;box-shadow: inset 0 0 10px grey;width:60px;"></input>' +
-      '<button style="top: 0px;position: absolute;">CHECK</button>' +
+      '<button>CHECK</button>' +
       "</div>"
     );
   }
