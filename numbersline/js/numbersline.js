@@ -49,7 +49,10 @@ class NumbersLine {
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      .attr(
+        "transform",
+        "translate(" + margin.left + "," + margin.top / 2 + ")"
+      );
 
     this._tickValues = [
       minNumber,
@@ -58,7 +61,7 @@ class NumbersLine {
       randomNumber
     ];
 
-    (this._inputBoxWidth = 170),
+    (this._inputBoxWidth = 190),
       (this._inputBoxHeight = 50),
       (this._inputBoxTop = 100),
       (this._inputBoxSize =
@@ -107,6 +110,7 @@ class NumbersLine {
     this.renderX();
     this.renderY();
     this.renderInputBox();
+    this.renderCheckbox();
     this.renderArrow();
   }
 
@@ -125,8 +129,17 @@ class NumbersLine {
   getInputHtml() {
     return (
       '<div xmlns="http://www.w3.org/2000/svg" style="width: 100px;height: 100%;display:inline;vertical-align:middle;line-height: 30px;">' +
-      '<input style="font-size: 20px;box-shadow: inset 0 0 10px grey;width:60px;"></input>' +
-      '<button>CHECK</button>' +
+      '<input type="number" style="font-size: 20px;box-shadow: inset 0 0 10px grey;width:80px;"></input>' +
+      "<button>CHECK</button>" +
+      "</div>"
+    );
+  }
+
+  getCheckboxHtml() {
+    return (
+      '<div xmlns="http://www.w3.org/2000/svg" style="width: 100px;height: 100%;display:inline;vertical-align:middle;line-height:40px;">' +
+      '<label><input type="checkbox" checked="false" style="font-size: 20px;box-shadow: inset 0 0 2px grey;width:20px;vertical-align: middle;"/>' +
+      '<span style="vertical-align: middle;">Tips</span></label>' +
       "</div>"
     );
   }
@@ -182,6 +195,29 @@ class NumbersLine {
     });
   }
 
+  renderCheckbox() {
+    if (!this._checkbox) {
+      this._checkbox = this._svg
+        .append("foreignObject")
+        .attr("x", this._xScale((this._maxNumber - this._minNumber) / 2))
+        .attr("y", 70)
+        .attr("width", 110)
+        .attr("height", 40)
+        .attr("transform", this._svg.attr("transform"))
+        .html(this.getCheckboxHtml());
+      var that = this;
+      this._checkbox.select("input").on("change", function() {
+        if (d3.event && d3.event.target.checked) {
+          that._showTips = true;
+        } else {
+          that._showTips = false;
+        }
+        that.renderX();
+      });
+    }
+    this._checkbox.select("input").attr("checked", this._showTips);
+  }
+
   renderArrow() {
     this._svg
       .append("path")
@@ -192,16 +228,53 @@ class NumbersLine {
   }
 
   renderX() {
-    this._xAxis = this._svg
-      .append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + this._height + ")")
-      .call(
+    if (!this._xAxis) {
+      this._xAxis = this._svg
+        .append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + this._height + ")");
+    }
+
+    if (this._showTips) {
+      this._tickValues = d3.range(
+        this._minNumber,
+        this._maxNumber,
+        (this._maxNumber - this._minNumber) / 20
+      );
+      this._tickValues.push(this._maxNumber);
+      this._tickValues.push(this._randomNumber);
+
+      this._xAxis.call(
         d3
           .axisTop(this._xScale)
           .tickValues(this._tickValues)
           .tickFormat(this.formatQuestionMark())
       );
+      this._xAxis
+        .selectAll("g")
+        .transition("fadein")
+        .style("stroke", "red")
+        .attr("stroke-width", 3)
+        .duration(400)
+        .transition("fadeout")
+        .attr("stroke-width", 1)
+        .duration(400);
+    } else {
+      this._tickValues = [
+        this._minNumber,
+        (this._minNumber + this._maxNumber) / 2,
+        this._maxNumber,
+        this._randomNumber
+      ];
+      this._xAxis.call(
+        d3
+          .axisTop(this._xScale)
+          .tickValues(this._tickValues)
+          .tickFormat(this.formatQuestionMark())
+      );
+    }
+    this.renderInputBox(this._answer);
+    this.renderCheckbox();
   }
 
   renderY() {
@@ -212,49 +285,19 @@ class NumbersLine {
       .call(d3.axisLeft(this._yScale).ticks(0));
   }
 
-  showTips(answer) {
-    this._tickValues = d3.range(
-      this._minNumber,
-      this._maxNumber,
-      (this._maxNumber - this._minNumber) / 20
-    );
-    this._tickValues.push(this._maxNumber);
-    this._tickValues.push(this._randomNumber);
-
-    this._xAxis.call(
-      d3
-        .axisTop(this._xScale)
-        .tickValues(this._tickValues)
-        .tickFormat(this.formatQuestionMark())
-    );
-    this._xAxis
-      .selectAll("g")
-      .transition("fadein")
-      .style("stroke", "red")
-      .attr("stroke-width", 3)
-      .duration(400)
-      .transition("fadeout")
-      .attr("stroke-width", 1)
-      .duration(400);
-    this.renderInputBox(answer);
-  }
-
   checkResult(answer) {
     if (answer === "") return;
+    this._answer = answer;
     const diff = Math.abs(answer - this._randomNumber);
     let score = 10;
 
-    if (diff <= 0.5) {
-      this.showTips(answer);
+    if (diff <= 1) {
       score = 10;
     } else if (diff <= 5) {
-      this.showTips(answer);
       score = 9;
     } else if (diff <= 10) {
-      this.showTips(answer);
       score = 8;
     } else if (diff <= 20) {
-      this.showTips(answer);
       score = 7;
     } else {
       score = 6;
@@ -265,12 +308,12 @@ class NumbersLine {
   showScoreCard(score) {
     const mid = (this._maxNumber - this._minNumber) / 2;
     const w = 200,
-      h = 100;
+      h = 60;
     const x =
       this._randomNumber > mid
         ? this._xScale(this._maxNumber - this._minNumber) / 4 - w / 2
         : (this._xScale(this._maxNumber - this._minNumber) * 3) / 4 - w / 2;
-    const y = -100;
+    const y = -60;
     const vc = new ScoreCard(this._svg, x, y, w, h, score);
     vc.show();
   }

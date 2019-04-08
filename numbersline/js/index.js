@@ -11,7 +11,7 @@ var generateQuestions = function(min, max, total) {
   var questions = {};
   var nums = generateRandomNumbers(min, max, total);
   for (const k of nums) {
-    questions[k + ""] = new NumbersLine("#test", 65, 80, 10, 80, min, max, k);
+    questions[k + ""] = new NumbersLine("#test", 65, 90, 10, 90, min, max, k);
   }
   return questions;
 };
