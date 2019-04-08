@@ -138,7 +138,7 @@ class NumbersLine {
   getCheckboxHtml() {
     return (
       '<div xmlns="http://www.w3.org/2000/svg" style="width: 100px;height: 100%;display:inline;vertical-align:middle;line-height:40px;">' +
-      '<label><input type="checkbox" checked="false" style="font-size: 20px;box-shadow: inset 0 0 2px grey;width:20px;vertical-align: middle;"/>' +
+      '<label><input type="checkbox" checked="false" style="position:static;font-size: 20px;box-shadow: inset 0 0 2px grey;width:20px;vertical-align: middle;"/>' +
       '<span style="vertical-align: middle;">Tips</span></label>' +
       "</div>"
     );
